@@ -13,7 +13,7 @@ namespace vole::datamodel {
     using num_type = double;
     using string_type = std::string;
     using bool_type = bool;
-    class null_type {};
+    using null_type = nullptr_t;
 
     /**
      * Abstract entity class to represent internal data nodes
@@ -88,11 +88,71 @@ namespace vole::datamodel {
         node_list children;
     };
 
+    template <typename... Args>
+    std::shared_ptr<array_node> make_array(Args&&... args) {
+        return std::make_shared<array_node>(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    std::shared_ptr<literal_node> make_literal(Args&&... args) {
+        return std::make_shared<literal_node>(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    std::shared_ptr<object_node> make_object(Args&&... args) {
+        return std::make_shared<object_node>(std::forward<Args>(args)...);
+    }
+
+    /**
+     * The node_visitor class offers an API to run a class-specific
+     * function definition against a given node.
+     *
+     * Inherit from this class and define the type-specific visit
+     * callbacks, then call node.apply(visitor). The appropriate
+     * visit function for the given node shall be called.
+     */
     class node_visitor {
+        friend class literal_node;
+        friend class object_node;
+        friend class array_node;
     public:
         virtual ~node_visitor() = default;
-        virtual void visit(const array_node &node) = 0;
-        virtual void visit(const literal_node &node) = 0;
-        virtual void visit(const object_node &node) = 0;
+    protected:
+        virtual void visit(const array_node &node) {}
+        virtual void visit(const literal_node &node) {}
+        virtual void visit(const object_node &node) {}
     };
+
+    /**
+     * The node_descender class expands the capabilities of the
+     * node_visitor class by offering a recursive descent view
+     * into the node-tree. Instead of defining the 'visit' functions,
+     * the caller should overload the 'on_enter' and 'on_exit' functions.
+     */
+    class node_descender : public node_visitor {
+    public:
+        ~node_descender() override = default;
+
+    protected:
+        void visit(const array_node &node) final;
+        void visit(const literal_node &node) final;
+        void visit(const object_node &node) final;
+        virtual void on_enter(const array_node &node) {}
+        virtual void on_exit(const array_node &node) {}
+        virtual void on_enter(const literal_node &node) {}
+        virtual void on_exit(const literal_node &node) {}
+        virtual void on_enter(const object_node &node) {}
+        virtual void on_exit(const object_node &node) {}
+
+        /**
+         * get_depth gives the caller the current level of the node tree
+         * that the descender is on. Depth is update before and after visiting
+         * children of a node.
+         * @return the depth of the current node from the starter node
+         */
+        [[nodiscard]] size_t get_depth() const;
+    private:
+        size_t depth = 0;
+    };
+
 }

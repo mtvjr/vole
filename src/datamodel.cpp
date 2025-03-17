@@ -22,7 +22,7 @@ namespace vole::datamodel {
 
 
     std::string node::format_debug() const {
-        return std::format("{}<{}>", type(), name());
+        return std::format("{}{{{}}}", type(), name());
     }
 
 
@@ -163,6 +163,46 @@ namespace vole::datamodel {
     void object_node::apply(node_visitor &visitor) const {
         visitor.visit(*this);
     }
+
+
+    /************************************************************
+     *
+     *                  vole::datamodel::node_descender
+     *
+     ************************************************************/
+
+
+    void node_descender::visit(const array_node &node) {
+        on_enter(node);
+        depth++;
+        for (const auto &child : node.get_children()) {
+            child->apply(*this);
+        }
+        depth--;
+        on_exit(node);
+    }
+
+
+    void node_descender::visit(const literal_node &node) {
+        on_enter(node);
+        on_exit(node);
+    }
+
+
+    void node_descender::visit(const object_node &node) {
+        on_enter(node);
+        depth++;
+        for (const auto &child : node.get_children()) {
+            child->apply(*this);
+        }
+        depth--;
+        on_exit(node);
+    }
+
+    size_t node_descender::get_depth() const {
+        return depth;
+    }
+
 
 }
 

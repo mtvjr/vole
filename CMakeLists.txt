@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_library(vole
     src/datamodel.cpp
+    src/render.cpp
     src/exception.cpp
 )
 
@@ -16,6 +17,7 @@ target_sources(vole
             FILES
                 include/vole/datamodel.hpp
                 include/vole/exception.hpp
+                include/vole/render.hpp
 )
 
 add_executable(vole_renderer src/main.cpp)
