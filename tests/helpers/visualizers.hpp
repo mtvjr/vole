@@ -3,7 +3,7 @@
 #include <ostream>
 
 #include <vole/datamodel.hpp>
-#include <vole/render.hpp>
+#include <vole/node_printer.hpp>
 
 namespace vole::datamodel {
 
@@ -12,7 +12,7 @@ namespace vole::datamodel {
 
     template<node_type N>
     void PrintTo(const N &node, std::ostream *os) {
-        debug_renderer renderer;
+        node_printer renderer;
         *os << renderer.render(node);
     }
 

@@ -12,9 +12,9 @@ namespace vole {
      * The debug renderer class is able to render a node datamodel
      * tree as a string.
      */
-    class debug_renderer : public datamodel::node_descender {
+    class node_printer : public datamodel::node_descender {
     public:
-        ~debug_renderer() override = default;
+        ~node_printer() override = default;
 
         /**
          * Render the given node-tree as a tree for debug purposes.

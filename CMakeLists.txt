@@ -14,7 +14,7 @@ FetchContent_MakeAvailable(json)
 
 add_library(vole
     src/datamodel.cpp
-    src/render.cpp
+    src/node_printer.cpp
     src/exception.cpp
     src/datamodel_parsers.cpp
 )
@@ -26,7 +26,7 @@ target_sources(vole
                 include/vole/datamodel.hpp
                 include/vole/datamodel_parsers.hpp
                 include/vole/exception.hpp
-                include/vole/render.hpp
+    include/vole/node_printer.hpp
 )
 target_link_libraries(vole PUBLIC
     nlohmann_json::nlohmann_json

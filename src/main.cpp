@@ -5,12 +5,12 @@
 #include <vole/exception.hpp>
 #include <vole/datamodel.hpp>
 #include <vole/datamodel_parsers.hpp>
-#include <vole/render.hpp>
+#include <vole/node_printer.hpp>
 
 void load_and_display_model(std::string_view filename) {
     vole::datamodel::json_parser parser;
     auto model = parser.parse_file(filename);
-    vole::debug_renderer renderer;
+    vole::node_printer renderer;
     std::cout << renderer.render(*model) << std::endl;
 }
 
