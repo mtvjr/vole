@@ -13,6 +13,8 @@ include(GoogleTest)
 
 add_executable(vole_units
     datamodel_tests.cpp
+    datamodel_parser_tests.cpp
+    helpers/visualizers.hpp
 )
 target_sources(vole_units
     PUBLIC

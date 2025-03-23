@@ -4,20 +4,28 @@
 
 #include <vole/exception.hpp>
 #include <vole/datamodel.hpp>
+#include <vole/datamodel_parsers.hpp>
 #include <vole/render.hpp>
 
-using namespace vole::datamodel;
-
-int main() {
-    auto node = make_object("RootNode");
-    auto array = make_array("ArrayNode");
-    node->add_child(array);
-    array->add_child(make_literal("Child1", "Hello World!"));
-    array->add_child(make_literal("Child2", 2.0));
-    array->add_child(make_literal("Child3", true));
-    array->add_child(make_literal("Child4", nullptr));
+void load_and_display_model(std::string_view filename) {
+    vole::datamodel::json_parser parser;
+    auto model = parser.parse_file(filename);
     vole::debug_renderer renderer;
-    std::cout << renderer.render(*node) << std::endl;
+    std::cout << renderer.render(*model) << std::endl;
+}
+
+int main(int argc, const char* argv[]) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    try {
+        load_and_display_model(argv[0]);
+    } catch (std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

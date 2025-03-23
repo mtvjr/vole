@@ -7,6 +7,8 @@
 
 #include <vole/exception.hpp>
 
+#include "vole/datamodel_parsers.hpp"
+
 using namespace vole;
 using namespace std::string_literals;
 
@@ -50,7 +52,12 @@ namespace vole::datamodel {
     }
 
 
-    void array_node::apply(node_visitor &visitor) const {
+    void array_node::apply(const_node_visitor &visitor) const {
+        visitor.visit(*this);
+    }
+
+
+    void array_node::apply(node_visitor &visitor) {
         visitor.visit(*this);
     }
 
@@ -62,6 +69,30 @@ namespace vole::datamodel {
 
     const node_list& array_node::get_children() const {
         return children;
+    }
+
+    bool array_node::operator==(const node &other) const {
+        const auto other_array = dynamic_cast<const array_node*>(&other);
+        if (other_array == nullptr) {
+            // Not an array
+            return false;
+        }
+
+        if (this->name() != other_array->name()) {
+            return false;
+        }
+
+        if (this->children.size() != other_array->children.size()) {
+            return false;
+        }
+
+        for (size_t i = 0; i < this->children.size(); i++) {
+            if (*this->children[i] != *other_array->children[i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
@@ -106,8 +137,31 @@ namespace vole::datamodel {
     }
 
 
-    void literal_node::apply(node_visitor &visitor) const {
+    void literal_node::apply(const_node_visitor &visitor) const {
         visitor.visit(*this);
+    }
+
+
+    void literal_node::apply(node_visitor &visitor) {
+        visitor.visit(*this);
+    }
+
+    bool literal_node::operator==(const node &other) const {
+        const auto other_literal = dynamic_cast<const literal_node*>(&other);
+        if (other_literal == nullptr) {
+            // Not a literal
+            return false;
+        }
+
+        if (this->name() != other_literal->name()) {
+            return false;
+        }
+
+        if (this->value != other_literal->value) {
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -160,8 +214,100 @@ namespace vole::datamodel {
     }
 
 
-    void object_node::apply(node_visitor &visitor) const {
+    void object_node::apply(const_node_visitor &visitor) const {
         visitor.visit(*this);
+    }
+
+
+    void object_node::apply(node_visitor &visitor) {
+        visitor.visit(*this);
+    }
+
+
+    bool object_node::operator==(const node &other) const {
+        const auto other_object = dynamic_cast<const object_node*>(&other);
+        if (other_object == nullptr) {
+            // Not an object
+            return false;
+        }
+
+        if (this->name() != other_object->name()) {
+            return false;
+        }
+
+        if (this->children.size() != other_object->children.size()) {
+            return false;
+        }
+
+        for (size_t i = 0; i < this->children.size(); i++) {
+            if (*this->children[i] != *other_object->children[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /************************************************************
+     *
+     *                  vole::datamodel::lambda_node_visitor
+     *
+     ************************************************************/
+
+
+    lambda_node_visitor::lambda_node_visitor(
+        const array_function &on_array,
+        const literal_function &on_literal,
+        const object_function &on_object
+    )
+        : on_array(on_array), on_literal(on_literal), on_object(on_object)
+    {}
+
+
+    void lambda_node_visitor::visit(array_node &node) {
+        on_array(node);
+    }
+
+
+    void lambda_node_visitor::visit(literal_node &node) {
+        on_literal(node);
+    }
+
+
+    void lambda_node_visitor::visit(object_node &node) {
+        on_object(node);
+    }
+
+
+    /************************************************************
+     *
+     *                  vole::datamodel::lambda_node_visitor
+     *
+     ************************************************************/
+
+
+    lambda_const_node_visitor::lambda_const_node_visitor(
+        const array_function &on_array,
+        const literal_function &on_literal,
+        const object_function &on_object
+    )
+        : on_array(on_array), on_literal(on_literal), on_object(on_object)
+    {}
+
+
+    void lambda_const_node_visitor::visit(const array_node &node) {
+        on_array(node);
+    }
+
+
+    void lambda_const_node_visitor::visit(const literal_node &node) {
+        on_literal(node);
+    }
+
+
+    void lambda_const_node_visitor::visit(const object_node &node) {
+        on_object(node);
     }
 
 
@@ -202,6 +348,8 @@ namespace vole::datamodel {
     size_t node_descender::get_depth() const {
         return depth;
     }
+
+
 
 
 }

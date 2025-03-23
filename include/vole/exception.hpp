@@ -39,4 +39,10 @@ namespace vole {
         [[nodiscard]] std::string_view type() const noexcept(true) override;
     };
 
+    class unsupported_element_exception : public vole::exception {
+    public:
+        explicit unsupported_element_exception(std::string text);
+        [[nodiscard]] std::string_view type() const noexcept(true) override;
+    };
+
 }
