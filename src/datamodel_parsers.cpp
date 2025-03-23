@@ -9,19 +9,6 @@
 
 namespace vole::datamodel {
 
-    shared_node parser::parse_file(std::filesystem::path path) {
-        std::ifstream file(path, std::ios::in);
-        if (file.is_open() == false) {
-            // FIXME: Make a new exception
-            throw std::runtime_error("Failed to open file");
-        }
-        std::istreambuf_iterator<char> fitr{file}, end;
-        const std::string input(fitr, end);
-        file.close();
-
-        return parse(input);
-    }
-
     class json_sax_listener : public nlohmann::json_sax<nlohmann::json> {
     public:
 

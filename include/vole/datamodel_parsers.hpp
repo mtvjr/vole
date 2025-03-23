@@ -10,7 +10,6 @@ namespace vole::datamodel {
     class parser {
     public:
         virtual ~parser() = default;
-        [[nodiscard]] shared_node parse_file(std::filesystem::path path);
         [[nodiscard]] virtual shared_node parse(std::string_view input) = 0;
     };
 
