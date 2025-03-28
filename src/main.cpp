@@ -13,13 +13,13 @@
  * @param path The path to the file
  * @return A std::string containing the contents of the file
  */
-std::string load_file(std::filesystem::path path) {
+std::string load_file(const std::filesystem::path &path) {
     std::ifstream file(path, std::ios::in);
     if (file.is_open() == false) {
         throw std::runtime_error("Failed to open file");
     }
     std::istreambuf_iterator<char> fitr{file}, end;
-    return std::string(fitr, end);
+    return {fitr, end};
 }
 
 void load_and_display_model(std::string_view filename) {
@@ -29,7 +29,8 @@ void load_and_display_model(std::string_view filename) {
     std::cout << renderer.render(*model) << std::endl;
 }
 
-int main(int argc, const char* argv[]) {
+
+int main(const int argc, const char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
         return EXIT_FAILURE;

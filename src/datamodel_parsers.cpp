@@ -76,7 +76,9 @@ namespace vole::datamodel {
             return true;
         }
 
-        bool parse_error(std::size_t location, const std::string &token, const nlohmann::detail::exception& e) override {
+        bool parse_error(std::size_t location,
+                         const std::string &token,
+                         const nlohmann::detail::exception& e) override {
             throw unsupported_element_exception("Errors are not supported");
         }
 
@@ -116,40 +118,40 @@ namespace vole::datamodel {
     node_tree_builder::node_tree_builder() = default;
 
 
-    void node_tree_builder::add_child(const shared_node &newNode) {
+    void node_tree_builder::add_child(const shared_node &new_node) {
         if (node_stack.empty()) {
-            root_node = newNode;
-            node_stack.push_back(newNode);
+            root_node = new_node;
+            node_stack.push_back(new_node);
             return;
         }
 
         // Create the inserter object. This enables us to insert elements into the node_tree
         lambda_node_visitor inserter {
             [&](array_node &node) {
-                node.add_child(newNode);
+                node.add_child(new_node);
             },
             [&](literal_node &) {
                 throw invalid_operation_exception("Cannot add children to a literal node");
             },
             [&](object_node &node) {
-                node.add_child(newNode);
+                node.add_child(new_node);
             },
         };
         // Create the visitor object. This enables us to determine what type of node is being added.
         lambda_node_visitor visitor {
             [&](const array_node &node) {
                 node_stack.back()->apply(inserter);
-                node_stack.push_back(newNode);
+                node_stack.push_back(new_node);
             },
             [&](const literal_node &) {
                 node_stack.back()->apply(inserter);
             },
             [&](const object_node &) {
                 node_stack.back()->apply(inserter);
-                node_stack.push_back(newNode);
+                node_stack.push_back(new_node);
             },
         };
-        newNode->apply(visitor);
+        new_node->apply(visitor);
     }
 
 
