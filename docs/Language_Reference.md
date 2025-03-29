@@ -25,37 +25,37 @@ Import the contents of filename into the current render scope.
 
 ### Looping
 
-```@FOR item IN ${y}@```
-```@END FOR@```
+```@for item in ${y}@```
+```@end for@```
 
 Iterate over the items in the variable y. If used on an object, this will iterate over
 their values and not display their keys.
 
-```@FOR key, value IN ${y}@```
-```@END FOR@```
+```@for key, value in ${y}@```
+```@end for@```
 
 Iterate over the items in the variable y. If used on an array, the key will be the
 index.
 
-```@FOR i IN start..end@```
-```@END FOR@```
+```@for i in start..end@```
+```@end for@```
 
 Iterate over a range of numbers, begining at `start` and ending at the element before
 `end`. Thus, `0..3` will iterate over `0 1 2`.
 
 ### Selection
 
-```@IF condition@```
-```@END IF@```
+```@if condition@```
+```@end if@```
 
 Evaluate the contents between IF and END IF if the condition evaluates to true.
 
 ### Set output filename
 
-```@OUTPUT filename@```
-```@END OUTPUT@```
+```@output filename@```
+```@end output@```
 
-Until END OUTPUT is reached, render to the given filename instead of the current
+Until `end output` is reached, render to the given filename instead of the current
 file.
 
 ### Render a variable
@@ -64,7 +64,7 @@ file.
 
 Render the contents of a variable. This is only valid for literal objects.
 
-```${JSON variable}```
+```${variable | dump}```
 
 Render the model of a variable. This is valid for any object type.
 
@@ -91,31 +91,31 @@ ARRAY_ACCESSOR ::= "[" <EXPRESSION> "]" | "[" <EXPRESSION> "]" <ACCESSOR>
 
 COMMAND_BLOCK ::= <NOOUT_COMMAND> | <INCLUDE_COMMAND> | <DEFINE_COMMAND> | <FOR_BLOCK> | <IF_BLOCK> | <OUTPUT_BLOCK>
 
-NOOUT_COMMAND ::= "@NOOUT@"
-NOOUT_COMMAND ::= "@INCLUDE " <EXPRESSION> "@"
+NOOUT_COMMAND ::= "@noout@"
+INCLUDE_COMMAND ::= "@include " <EXPRESSION> "@"
 
 DEFINE_COMMAND ::= "@" <DEFINITION> "@"
-DEFINITION ::= "DEFINE " <VARIABLE_EXPANSION>  " = " <EXPRESSION>
+DEFINITION ::= "define " <VARIABLE_EXPANSION>  " = " <EXPRESSION>
 
 FOR_BLOCK ::= <BEGIN_FOR> | <VALID_VOLE> | <END_FOR>
-BEGIN_FOR ::= "@FOR" FOR_DEFINITION "@"
-END_FOR ::= "@END FOR@"
+BEGIN_FOR ::= "@for" FOR_DEFINITION "@"
+END_FOR ::= "@end for@"
 FOR_DEFINITION ::= <FOR_EACH> | <FOR_EACH_KEY> | <FOR_RANGE>
-FOR_EACH := <IDENTIFIER> " IN " <VARIABLE_EXPANSION>
-FOR_EACH_KEY ::= <IDENTIFIER> ", " <IDENTIFIER> " IN " <VARIABLE_EXPANSION>
-FOR_RANGE ::= <IDENTIFIER> " IN " <EXPRESSION> ".." <EXPRESSION>
+FOR_EACH := <IDENTIFIER> " in " <VARIABLE_EXPANSION>
+FOR_EACH_KEY ::= <IDENTIFIER> ", " <IDENTIFIER> " in " <VARIABLE_EXPANSION>
+FOR_RANGE ::= <IDENTIFIER> " in " <EXPRESSION> ".." <EXPRESSION>
 
 IF_BLOCK ::= <IF_DEFINITION> | <VALID_VOLE> | <END_IF>
-IF_DEFINITION ::= "@IF" <EXPRESSION> "@"
-END_IF ::= "@END IF@"
+IF_DEFINITION ::= "@if" <EXPRESSION> "@"
+END_IF ::= "@end if@"
 
 IF_BLOCK ::= <IF_DEFINITION> | <VALID_VOLE> | <END_IF>
-IF_DEFINITION ::= "@IF" <EXPRESSION> "@"
-END_IF ::= "@END IF@"
+IF_DEFINITION ::= "@if" <EXPRESSION> "@"
+END_IF ::= "@end if@"
 
 OUTPUT_BLOCK ::= <OUTPUT_DEFINITION> | <VALID_VOLE> | <END_OUTPUT>
-OUTPUT_DEFINITION ::= "@OUTPUT" <EXPRESSION> "@"
-END_OUTPUT ::= "@END OUTPUT@"
+OUTPUT_DEFINITION ::= "@output" <EXPRESSION> "@"
+END_OUTPUT ::= "@end output@"
 ```
 
 ## Motivating Example: Enum Stringification
@@ -148,29 +148,29 @@ Input:
 
 ```
 @# Disable outputting files outside of the OUTPUT statements #@
-@NOOUT@
-@DEFINE notice="/** COPYRIGHT Michael Volling 2025"@
+@noout@
+@define notice="/** COPYRIGHT Michael Volling 2025"@
 
-@FOR enum IN emums@
-    @OUTPUT "enums/${enum.name}.hpp"@
+@for enum in emums@
+    @output "enums/${enum.name}.hpp"@
         ${notice}
         
         #include <string>
         
         enum class ${enum.name} {
-            @FOR name, value IN ${enum.items}@
+            @for name, value in ${enum.items}@
             ${name} = ${value}
-            @END FOR@
+            @end for@
         }
         
         std::string stringify(${enum.name} value);
         
         ${enum.name} parse_${enum.name}(const std::string &value);
-    @END OUTPUT@
-@END FOR@
+    @end output@
+@end for@
 
-@FOR enum IN emums@
-    @OUTPUT "enums/${enum.name}.cpp"@
+@for enum in emums@
+    @output "enums/${enum.name}.cpp"@
         ${notice}
         
         #include "enums/${enum.name}"
@@ -178,18 +178,19 @@ Input:
         
         std::string stringify(${enum.name} value) {
             switch (value) {
-                @FOR name, _value IN ${enum.items}@
+                @for name, _value in ${enum.items}@
                 case ${name}: return "${name}";
-                @END FOR@
+                @end for@
                 default: return "INVALID";
             }
         }
         
         ${enum.name} parse_${enum.name}(const std::string &value) {
-            @FOR name, _ IN ${enum.items}@
+            @for name, _ in ${enum.items}@
                 if (value == "${name}") return ${name};
-            @END FOR@
+            @end for@
             throw std::runtime_error("Invalid Value: " + value);
-    @END OUTPUT@
-@END FOR@
+        }
+    @end output@
+@end for@
 ```
