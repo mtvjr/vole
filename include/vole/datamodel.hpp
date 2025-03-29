@@ -38,6 +38,7 @@ namespace vole::datamodel {
         virtual void apply(node_visitor &visitor) = 0;
 
         virtual bool operator==(const node &) const = 0;
+        virtual bool operator!=(const node &) const;
 
     private:
         std::string _name;

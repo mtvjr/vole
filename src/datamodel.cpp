@@ -4,6 +4,7 @@
 
 #include <regex>
 #include <type_traits>
+#include <fmt/format.h>
 
 #include <vole/exception.hpp>
 
@@ -11,7 +12,6 @@
 
 using namespace vole;
 using namespace std::string_literals;
-
 
 
 namespace vole::datamodel {
@@ -24,7 +24,12 @@ namespace vole::datamodel {
 
 
     std::string node::format_debug() const {
-        return std::format("{}{{{}}}", type(), name());
+        return fmt::format("{}{{{}}}", type(), name());
+    }
+
+
+    bool node::operator!=(const node& other) const {
+        return !(*this == other);
     }
 
 
@@ -45,7 +50,7 @@ namespace vole::datamodel {
             return children.at(index);
         } catch (std::out_of_range) {
             throw no_such_element_exception(
-                std::format("{} {} does not contain an element at index{}",
+                fmt::format("{} {} does not contain an element at index{}",
                     type(), name(), index)
             );
         }
@@ -102,38 +107,46 @@ namespace vole::datamodel {
      * 
      ************************************************************/
 
-    template<class... Ts>
-    struct overloaded : Ts... { using Ts::operator()...; };
-
 
     std::string literal_node::type() const {
-        auto type_printer = overloaded {
-            [](const num_type &) {return "number";},
-            [](const string_type &) {return "string";},
-            [](const bool_type &) {return "bool";},
-            [](const null_type) {return "null";}
-        };
-        std::string held_type{std::visit(type_printer, value)};
-        return std::format("literal_node<{}>", held_type);
+        static struct printer_t {
+            std::string operator()(const null_type&) {return "null";}
+            std::string operator()(const string_type& s) {return "string";}
+            std::string operator()(const bool_type& b) {return "bool";}
+            std::string operator()(const num_type& n) {return "num";}
+        } renderer;
+        return std::visit(renderer, value);
     }
 
+    std::string render_bool(bool_type b) {
+        return b ? "true" : "false";
+    }
+
+    std::string render_int(num_type i) {
+        // if it's an integer, don't display zeroes
+        return fmt::format("{:.0f}", i);
+    }
+
+    std::string render_real(num_type d) {
+        return std::to_string(d);
+    }
+
+    std::string render_num(num_type n) {
+        double integral = 0.0;
+        if (std::modf(n, &integral) == 0.0) {
+            return render_int(n);
+        }
+        return render_real(n);
+    }
 
     std::string literal_node::render() const {
-        auto value_printer = overloaded {
-            [](const num_type &v) {
-                // if it's an integer, don't display zeroes
-                double integral = 0.0;
-                if (std::modf(v, &integral) == 0.0) {
-                    return std::format("{:.0f}", v);
-                }
-                return std::to_string(v);
-            },
-            [](const string_type &v) {return v;},
-            [](const bool_type &v) {return v ? "true"s : "false"s;},
-            [](const null_type) {return "null"s;}
-        };
-        std::string rendered = std::visit(value_printer, value);
-        return rendered;
+        struct printer_t {
+            std::string operator()(const null_type&) {return "null";}
+            std::string operator()(const string_type& s) {return s;}
+            std::string operator()(const bool_type& b) {return render_bool(b);}
+            std::string operator()(const num_type& n) {return render_num(n);}
+        } renderer;
+        return std::visit<std::string>(renderer, value);
     }
 
 
@@ -178,7 +191,7 @@ namespace vole::datamodel {
 
         if (childItr == children.end()) {
             throw no_such_element_exception(
-                std::format("{} {} does not contain an element with name {}",
+                fmt::format("{} {} does not contain an element with name {}",
                     type(), this->name(), name)
             );
         }
@@ -198,7 +211,7 @@ namespace vole::datamodel {
         
         if (existingChildItr != children.end()) {
             throw duplicate_key_exception(
-                std::format(
+                fmt::format(
                     "Unable to add {} to {} as there already exists an element with that name",
                     newChild->name(), this->name()
                 )

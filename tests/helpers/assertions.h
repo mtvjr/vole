@@ -14,7 +14,7 @@
  * @param expected The expected prefix the actual string must start with
  */
 #define EXPECT_STARTS_WITH(actual, expected) \
-    EXPECT_TRUE(actual.starts_with(expected))
+    EXPECT_EQ(actual.find(expected), 0);
 
 
 #define ASSERT_NODE_EQ(v1, v2)                          \

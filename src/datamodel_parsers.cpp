@@ -4,6 +4,7 @@
 #include <optional>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 #include "vole/exception.hpp"
 
@@ -91,9 +92,9 @@ namespace vole::datamodel {
             // Last parent was an array, number it!
             if (auto last_array = std::dynamic_pointer_cast<array_node>(builder.last_parent())) {
                 auto length = last_array->get_children().size();
-                return std::format("{}[{}]", last_array->name(), length);
+                return fmt::format("{}[{}]", last_array->name(), length);
             }
-            return std::format("Unnamed{}{}", type, unnamed_object_count++);
+            return fmt::format("Unnamed{}{}", type, unnamed_object_count++);
         }
     private:
         node_tree_builder builder;

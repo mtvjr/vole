@@ -5,7 +5,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 23)
 
-
+include(import_fmt)
 include(import_json)
 
 add_library(vole
@@ -26,6 +26,7 @@ target_sources(vole
 )
 target_link_libraries(vole PUBLIC
     nlohmann_json::nlohmann_json
+    fmt::fmt
 )
 
 add_executable(vole_renderer src/main.cpp)
